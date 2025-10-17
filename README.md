@@ -9,3 +9,11 @@ Sub modules: Ссылки на репозитории для веб-прилож
 Usage: Рекомендации как использовать приложение после установки. Может содержать скриншоты.
 
 Contributing: Сведения об авторах проекта и какие задачи реализовывали.
+
+to run sonar locally:
+
+1. docker compose -f .\compose.sonar.yaml up -d
+2. open localhost:9000
+3. generate token
+4. pass it in .env
+5. run make runsonar
