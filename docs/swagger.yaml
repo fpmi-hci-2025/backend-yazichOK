@@ -503,58 +503,6 @@ paths:
       summary: Add word to collection
       tags:
       - collections
-  /session:
-    post:
-      description: Start a new session
-      parameters:
-      - description: Session data
-        in: body
-        name: session
-        required: true
-        schema:
-          $ref: '#/definitions/views.StartSessionRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/views.SuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/views.StartSessionResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/views.ErrorResponse'
-            - properties:
-                error:
-                  $ref: '#/definitions/views.Error'
-              type: object
-        "404":
-          description: Not Found
-          schema:
-            allOf:
-            - $ref: '#/definitions/views.ErrorResponse'
-            - properties:
-                error:
-                  $ref: '#/definitions/views.Error'
-              type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/views.ErrorResponse'
-            - properties:
-                error:
-                  $ref: '#/definitions/views.Error'
-              type: object
-      summary: Start session
-      tags:
-      - session
   /session/{sessionID}/answer:
     post:
       consumes:
@@ -649,6 +597,58 @@ paths:
                   $ref: '#/definitions/views.Error'
               type: object
       summary: Complete session
+      tags:
+      - session
+  /sessions:
+    post:
+      description: Start a new session
+      parameters:
+      - description: Session data
+        in: body
+        name: session
+        required: true
+        schema:
+          $ref: '#/definitions/views.StartSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/views.StartSessionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+      summary: Start session
       tags:
       - session
   /topics:

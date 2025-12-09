@@ -84,7 +84,7 @@ func (s *App) getTopicQuestions() func(http.ResponseWriter, *http.Request) {
 // @Failure 400 {object} views.ErrorResponse{error=views.Error}
 // @Failure 404 {object} views.ErrorResponse{error=views.Error}
 // @Failure 500 {object} views.ErrorResponse{error=views.Error}
-// @Router /session [post]
+// @Router /sessions [post]
 func (s *App) startSession() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req views.StartSessionRequest
