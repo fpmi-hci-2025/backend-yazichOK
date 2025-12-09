@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: speech-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - speech-network
+
+  minio:
+    image: minio/minio
+    container_name: speech-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    ports:
+      - "${MINIO_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - speech-network
+
+  # MinIO bucket initialization
+  minio-init:
+    image: minio/mc
+    container_name: speech-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      /usr/bin/mc config host add myminio http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
+      /usr/bin/mc mb myminio/${MINIO_IMAGES_BUCKET} --ignore-existing;
+      /usr/bin/mc mb myminio/${MINIO_ANSWERS_BUCKET} --ignore-existing;
+      /usr/bin/mc anonymous set public myminio/${MINIO_IMAGES_BUCKET};
+      /usr/bin/mc anonymous set public myminio/${MINIO_ANSWERS_BUCKET};
+      exit 0;
+      "
+    networks:
+      - speech-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: speech-api
+    environment:
+      HTTP_PORT: ${HTTP_PORT}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB_NAME: ${POSTGRES_DB_NAME}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_USE_SSL: "false"
+      MINIO_IMAGES_BUCKET: ${MINIO_IMAGES_BUCKET}
+      MINIO_ANSWERS_BUCKET: ${MINIO_ANSWERS_BUCKET}
+      DEEPGRAM_API_KEY: ${DEEPGRAM_API_KEY}
+      DEEPGRAM_URL: ${DEEPGRAM_URL}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_URL: ${GEMINI_URL}
+    ports:
+      - "${API_PORT}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+      - speech-network
+
+volumes:
+  postgres_data:
+    driver: local
+  minio_data:
+    driver: local
+
+networks:
+  speech-network:
+    driver: bridge

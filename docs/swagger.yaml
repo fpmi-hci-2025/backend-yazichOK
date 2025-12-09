@@ -1,0 +1,726 @@
+definitions:
+  views.AISuggestionDTO:
+    properties:
+      reason:
+        type: string
+      translation:
+        type: string
+      word:
+        type: string
+    type: object
+  views.AddWordToCollectionRequest:
+    properties:
+      example:
+        type: string
+      translation:
+        type: string
+      word:
+        type: string
+    type: object
+  views.AddWordToCollectionResponse:
+    properties:
+      word:
+        $ref: '#/definitions/views.UserWordDTO'
+    type: object
+  views.ArticleData:
+    properties:
+      article:
+        $ref: '#/definitions/views.ArticleDetails'
+    type: object
+  views.ArticleDetails:
+    properties:
+      content:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      level:
+        type: string
+      minutes:
+        type: integer
+      rules:
+        items:
+          $ref: '#/definitions/views.GrammarRuleItem'
+        type: array
+      title:
+        type: string
+      vocabulary:
+        items:
+          $ref: '#/definitions/views.VocabularyWord'
+        type: array
+    type: object
+  views.ArticlePreview:
+    properties:
+      id:
+        type: integer
+      image_url:
+        type: string
+      level:
+        type: string
+      minutes_to_read:
+        type: integer
+      title:
+        type: string
+    type: object
+  views.ArticlesPreviewData:
+    properties:
+      articles:
+        items:
+          $ref: '#/definitions/views.ArticlePreview'
+        type: array
+    type: object
+  views.CompleteSessionResp:
+    properties:
+      grammar_issues:
+        items:
+          properties:
+            corrected_sentence:
+              type: string
+            explanation:
+              type: string
+            sentence:
+              type: string
+          type: object
+        type: array
+      overall_feedback:
+        type: string
+      overall_level:
+        type: string
+      rephrase_suggestions:
+        items:
+          properties:
+            original:
+              type: string
+            suggestion:
+              type: string
+          type: object
+        type: array
+      top_words:
+        items:
+          properties:
+            level:
+              type: string
+            word:
+              type: string
+          type: object
+        type: array
+    type: object
+  views.CreateWordCollectionResponse:
+    properties:
+      data:
+        properties:
+          collection:
+            $ref: '#/definitions/views.WordCollectionResponse'
+        type: object
+    type: object
+  views.Error:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  views.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/views.Error'
+    type: object
+  views.GetAllTopicsResponse:
+    properties:
+      topics:
+        items:
+          properties:
+            description:
+              type: string
+            id:
+              type: integer
+            photo_url:
+              type: string
+            title:
+              type: string
+          type: object
+        type: array
+    type: object
+  views.GetTopicQuestionsResponse:
+    properties:
+      questions:
+        items:
+          $ref: '#/definitions/views.Question'
+        type: array
+    type: object
+  views.GetUserCollectionsResponse:
+    properties:
+      collections:
+        items:
+          $ref: '#/definitions/views.WordCollectionResponse'
+        type: array
+    type: object
+  views.GrammarRuleItem:
+    properties:
+      example:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      note:
+        type: string
+    type: object
+  views.Question:
+    properties:
+      id:
+        type: integer
+      text:
+        type: string
+    type: object
+  views.StartSessionRequest:
+    properties:
+      topic_id:
+        type: integer
+    type: object
+  views.StartSessionResponse:
+    properties:
+      session:
+        properties:
+          id:
+            example: 550e8400-e29b-41d4-a716-446655440000
+            type: string
+          topic:
+            properties:
+              id:
+                example: 1
+                type: integer
+              questions:
+                items:
+                  properties:
+                    id:
+                      example: 101
+                      type: integer
+                    text:
+                      example: What is your name?
+                      type: string
+                  type: object
+                type: array
+            type: object
+        type: object
+    type: object
+  views.SuccessResponse:
+    properties:
+      data: {}
+    type: object
+  views.UserWordDTO:
+    properties:
+      example:
+        type: string
+      id:
+        type: string
+      next_review_date:
+        type: string
+      review_count:
+        type: integer
+      translation:
+        type: string
+      word:
+        type: string
+    type: object
+  views.VocabularyWord:
+    properties:
+      id:
+        type: integer
+      meaning:
+        type: string
+      part_of_speech:
+        type: string
+      word:
+        type: string
+    type: object
+  views.WordCollectionDetail:
+    properties:
+      ai_suggestions:
+        items:
+          $ref: '#/definitions/views.AISuggestionDTO'
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      total_words:
+        type: integer
+      user_words:
+        items:
+          $ref: '#/definitions/views.UserWordDTO'
+        type: array
+    type: object
+  views.WordCollectionDetailResponse:
+    properties:
+      collection:
+        $ref: '#/definitions/views.WordCollectionDetail'
+    type: object
+  views.WordCollectionResponse:
+    properties:
+      created_at:
+        type: string
+      current_streak_days:
+        type: integer
+      id:
+        description: UUID
+        type: string
+      image_url:
+        type: string
+      learned_words:
+        type: integer
+      name:
+        type: string
+      total_words:
+        type: integer
+    type: object
+info:
+  contact: {}
+  description: This is a sample server for speech processing.
+  title: Speech Processing Service API
+  version: "1.0"
+paths:
+  /articles:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of article previews with pagination support
+      parameters:
+      - default: 10
+        description: Number of articles to return
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of articles to skip
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/views.ArticlesPreviewData'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+      summary: Get articles with pagination
+      tags:
+      - articles
+  /articles/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns full article details including vocabulary and grammar rules
+      parameters:
+      - description: Article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.ArticleData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+      summary: Get article by ID
+      tags:
+      - articles
+  /collections:
+    get:
+      description: Get all word collections for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.GetUserCollectionsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+      summary: Get user collections
+      tags:
+      - collections
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a new word collection with optional image
+      parameters:
+      - description: Collection name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Collection image
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.CreateWordCollectionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+      summary: Create word collection
+      tags:
+      - collections
+  /collections/{id}:
+    delete:
+      description: Delete a word collection by ID
+      parameters:
+      - description: Collection ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+      summary: Delete word collection
+      tags:
+      - collections
+    get:
+      description: Get full information about a specific collection including user
+        words and AI suggestions
+      parameters:
+      - description: Collection ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.WordCollectionDetailResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+      summary: Get collection detail
+      tags:
+      - collections
+  /collections/{id}/words:
+    post:
+      consumes:
+      - application/json
+      description: Add a new word to a collection
+      parameters:
+      - description: Collection ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Word data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/views.AddWordToCollectionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/views.AddWordToCollectionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/views.ErrorResponse'
+      summary: Add word to collection
+      tags:
+      - collections
+  /session:
+    post:
+      description: Start a new session
+      parameters:
+      - description: Session data
+        in: body
+        name: session
+        required: true
+        schema:
+          $ref: '#/definitions/views.StartSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/views.StartSessionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+      summary: Start session
+      tags:
+      - session
+  /session/{sessionID}/answer:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Attach an answer to a session
+      parameters:
+      - description: Session ID
+        in: path
+        name: sessionID
+        required: true
+        type: string
+      - description: Question ID
+        in: formData
+        name: questionID
+        required: true
+        type: integer
+      - description: Answer file
+        in: formData
+        name: answer
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.SuccessResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+      summary: Attach answer to session
+      tags:
+      - session
+  /session/{sessionID}/complete:
+    post:
+      description: Complete a session
+      parameters:
+      - description: Session ID
+        in: path
+        name: sessionID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/views.CompleteSessionResp'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+      summary: Complete session
+      tags:
+      - session
+  /topics:
+    get:
+      description: Get a list of all topics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/views.GetAllTopicsResponse'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+      summary: Get all topics
+      tags:
+      - topics
+  /topics/{topicID}/questions:
+    get:
+      description: Get a list of questions by topic
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/views.GetTopicQuestionsResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.ErrorResponse'
+            - properties:
+                error:
+                  $ref: '#/definitions/views.Error'
+              type: object
+      summary: Get questions by topic
+      tags:
+      - topics
+swagger: "2.0"
